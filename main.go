@@ -6,6 +6,7 @@ import (
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"log"
+	"math/rand"
 	"time"
 )
 
@@ -95,7 +96,7 @@ func main() {
 		chromedp.Click(`button`, chromedp.NodeVisible),
 	)
 
-/*	err := chromedp.Run(ctx,
+	/*	err := chromedp.Run(ctx,
 		chromedp.Navigate(`https://golang.org/pkg/time/`),
 		chromedp.Text(`#pkg-overview`, &example, chromedp.NodeVisible, chromedp.ByID),
 	)*/
@@ -110,4 +111,11 @@ func NonHeadless(a *chromedp.ExecAllocator) {
 	chromedp.Flag("headless", false)(a)
 	chromedp.Flag("hide-scrollbars", false)(a)
 	chromedp.Flag("mute-audio", true)(a)
+}
+
+func GetDelay() {
+	min := 1
+	max := 5
+	randomInt := rand.Intn(max-min) + min
+	chromedp.Sleep(time.Duration(randomInt) * time.Second)
 }
