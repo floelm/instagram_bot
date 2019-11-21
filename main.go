@@ -8,6 +8,7 @@ import (
 	"github.com/chromedp/chromedp/kb"
 	"log"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -74,9 +75,55 @@ func main() {
 	ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
 	defer cancel()
 
-	// navigate to a page, wait for an element, click
-	var example string
 	err := chromedp.Run(ctx,
+		PerformLogin()...
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = chromedp.Run(ctx,
+		chromedp.SendKeys(`input[placeholder="Suchen"]`, hashtag, chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.Click("article > div > div > div > div > div > a > div", chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
+		GetDelay(),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = chromedp.Run(ctx,
+		FollowFirstXInList(20)...,
+		//FollowNumberInList(3),
+		//chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[3]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func NonHeadless(a *chromedp.ExecAllocator) {
+	chromedp.Flag("headless", false)(a)
+	chromedp.Flag("hide-scrollbars", false)(a)
+	chromedp.Flag("mute-audio", true)(a)
+}
+
+func GetDelay() chromedp.Action {
+	min := 1
+	max := 2
+	randomInt := rand.Intn(max-min) + min
+	return chromedp.Sleep(time.Duration(randomInt) * time.Second)
+}
+
+func PerformLogin() []chromedp.Action {
+	return []chromedp.Action{
 		network.Enable(),
 		network.SetExtraHTTPHeaders(network.Headers(Headers)),
 
@@ -98,6 +145,12 @@ func main() {
 		chromedp.Click(`button[type="submit"]`, chromedp.NodeVisible),
 		GetDelay(),
 		chromedp.Click(`.aOOlW.HoLwm`, chromedp.NodeVisible),
+		GetDelay(),
+	}
+}
+
+func FindItemFromSearch(hashtag string) []chromedp.Action {
+	return []chromedp.Action{
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, hashtag, chromedp.NodeVisible),
 		GetDelay(),
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
@@ -106,30 +159,20 @@ func main() {
 		GetDelay(),
 		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
 		GetDelay(),
-		chromedp.Click(`div[role="dialog"] > div > div > div button[type="button"]`, chromedp.NodeVisible),
-		chromedp.Sleep(1000*time.Second),
-	)
-
-	/*	err := chromedp.Run(ctx,
-		chromedp.Navigate(`https://golang.org/pkg/time/`),
-		chromedp.Text(`#pkg-overview`, &example, chromedp.NodeVisible, chromedp.ByID),
-	)*/
-
-	if err != nil {
-		log.Fatal(err)
 	}
-	log.Printf("Go's time.After example:\n%s", example)
 }
 
-func NonHeadless(a *chromedp.ExecAllocator) {
-	chromedp.Flag("headless", false)(a)
-	chromedp.Flag("hide-scrollbars", false)(a)
-	chromedp.Flag("mute-audio", true)(a)
+func FollowFirstXInList(count int) []chromedp.Action {
+	actions := make([]chromedp.Action, 0)
+
+	for i := 1; i < count; i++ {
+		actions = append(actions, GetDelay())
+		actions = append(actions, FollowNumberInList(i))
+	}
+
+	return actions
 }
 
-func GetDelay() chromedp.Action {
-	min := 1
-	max := 3
-	randomInt := rand.Intn(max-min) + min
-	return chromedp.Sleep(time.Duration(randomInt) * time.Second)
+func FollowNumberInList(number int) chromedp.Action {
+	return chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[`+ strconv.Itoa(number) +`]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch)
 }
