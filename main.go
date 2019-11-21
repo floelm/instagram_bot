@@ -87,13 +87,14 @@ func main() {
 
 		chromedp.Navigate(`https://www.instagram.com/accounts/login/?source=auth_switcher`),
 		chromedp.SendKeys(`input[name="username"]`, `blzdontblockus@web.de`, chromedp.NodeVisible),
-		chromedp.Sleep(2 * time.Second),
+		GetDelay(),
 		chromedp.SendKeys(`input[name="password"]`, `Hallo123456!`, chromedp.NodeVisible),
-		chromedp.Sleep(2 * time.Second),
+		GetDelay(),
 		chromedp.RemoveAttribute(`button[type="submit"]`, "disabled"),
 		chromedp.Click(`button[type="submit"]`, chromedp.NodeVisible),
-		chromedp.Sleep(5 * time.Second),
-		chromedp.Click(`button`, chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.Click(`.aOOlW.HoLwm`, chromedp.NodeVisible),
+		chromedp.Sleep(60 * time.Second),
 	)
 
 	/*	err := chromedp.Run(ctx,
@@ -113,9 +114,9 @@ func NonHeadless(a *chromedp.ExecAllocator) {
 	chromedp.Flag("mute-audio", true)(a)
 }
 
-func GetDelay() {
+func GetDelay() chromedp.Action {
 	min := 1
-	max := 5
+	max := 3
 	randomInt := rand.Intn(max-min) + min
-	chromedp.Sleep(time.Duration(randomInt) * time.Second)
+	return chromedp.Sleep(time.Duration(randomInt) * time.Second)
 }
