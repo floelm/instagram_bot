@@ -5,6 +5,7 @@ import (
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+	"github.com/chromedp/chromedp/kb"
 	"log"
 	"math/rand"
 	"time"
@@ -54,6 +55,10 @@ const JsSetupScript = `(function(w, n, wn) {
 
 })(window, navigator, window.navigator);`
 
+const (
+	hashtag = "#vegan"
+)
+
 func main() {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		NonHeadless,
@@ -66,7 +71,7 @@ func main() {
 	defer cancel()
 
 	// create a timeout
-	ctx, cancel = context.WithTimeout(ctx, 60*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
 	defer cancel()
 
 	// navigate to a page, wait for an element, click
@@ -84,7 +89,6 @@ func main() {
 			return nil
 		}),
 
-
 		chromedp.Navigate(`https://www.instagram.com/accounts/login/?source=auth_switcher`),
 		chromedp.SendKeys(`input[name="username"]`, `blzdontblockus@web.de`, chromedp.NodeVisible),
 		GetDelay(),
@@ -94,7 +98,16 @@ func main() {
 		chromedp.Click(`button[type="submit"]`, chromedp.NodeVisible),
 		GetDelay(),
 		chromedp.Click(`.aOOlW.HoLwm`, chromedp.NodeVisible),
-		chromedp.Sleep(60 * time.Second),
+		chromedp.SendKeys(`input[placeholder="Suchen"]`, hashtag, chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.Click("article > div > div > div > div > div > a > div", chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
+		GetDelay(),
+		chromedp.Click(`div[role="dialog"] > div > div > div button[type="button"]`, chromedp.NodeVisible),
+		chromedp.Sleep(1000*time.Second),
 	)
 
 	/*	err := chromedp.Run(ctx,
