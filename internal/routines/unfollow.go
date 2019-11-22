@@ -56,14 +56,14 @@ func (r *UnfollowRoutine) FindUsersToUnfollow() {
 
 func (r *UnfollowRoutine) UnfollowUser() {
 	for {
-		msg, ok := <-r.userUrl
+		userUrl, ok := <-r.userUrl
 
 		if !ok {
 			panic(errors.New("failed to unfollow user"))
 		}
 
 		println("deleting user from cache")
-		r.userCache.Delete(msg)
+		r.userCache.Delete(userUrl)
 
 		opts := append(chromedp.DefaultExecAllocatorOptions[:],
 			setup.NonHeadless,
@@ -79,11 +79,13 @@ func (r *UnfollowRoutine) UnfollowUser() {
 		ctx, cancel = context.WithTimeout(ctx, 20*time.Second)
 		defer cancel()
 
-		err := actions.RunWrap(ctx,
-			actions.PerformLogin(),
+		err := actions.PerformLogin(ctx)
+
+		err = setup.RunWrap(ctx,
 			actions.GetDelay(),
-			actions.UnfollowUser(msg),
 		)
+
+		err = actions.UnfollowUser(ctx, userUrl)
 
 		if err != nil {
 			panic(err)

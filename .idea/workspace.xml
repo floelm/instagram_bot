@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="53ae4d86-ef65-489d-81ad-dfaf5f8405be" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/actions/unfollow.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/actions/unfollow.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/actions/unfollow.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/routines/unfollow.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/routines/unfollow.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -121,16 +120,5 @@
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/main.go</url>
-          <line>80</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
