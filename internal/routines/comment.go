@@ -24,7 +24,7 @@ func (r *CommentRoutine) Run() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	go r.comment(10*time.Second, "#gym")
+	go r.comment(10*time.Second, "#cat")
 
 	wg.Wait()
 }

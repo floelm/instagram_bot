@@ -13,7 +13,7 @@ func UnfollowUser(ctx context.Context, name string) error {
 		GetDelay(),
 		GetDelay(),
 		GetDelay(),
-		chromedp.Click(`/html/body/span/section/main/div/header/section/div[1]/div[1]/span/span[1]/button`, chromedp.NodeVisible),
+		chromedp.Click(`//*[@id="react-root"]/section/main/div/header/section/div[1]/div[1]/span/span[1]/button`, chromedp.NodeVisible),
 		GetDelay(),
 		GetDelay(),
 		GetDelay(),

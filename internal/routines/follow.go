@@ -19,7 +19,7 @@ func NewFollowRoutine() FollowRoutine {
 }
 
 func (r *FollowRoutine) Run() {
-	go r.follow(3, 10*time.Second, "#lustig")
+	go r.follow(3, 10*time.Second, "#cat")
 }
 
 func (r *FollowRoutine) follow(followCount int, interval time.Duration, hashtag string) {

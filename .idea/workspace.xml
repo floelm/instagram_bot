@@ -4,8 +4,9 @@
     <list default="true" id="53ae4d86-ef65-489d-81ad-dfaf5f8405be" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/actions/follow.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/actions/follow.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/routines/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/routines/comment.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/routines/follow.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/routines/follow.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/routines/unfollow.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/routines/unfollow.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/test/main.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
