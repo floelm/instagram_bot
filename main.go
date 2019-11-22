@@ -76,7 +76,7 @@ func main() {
 	defer cancel()
 
 	err := chromedp.Run(ctx,
-		PerformLogin()...
+		PerformLogin()...,
 	)
 
 	if err != nil {
@@ -84,11 +84,30 @@ func main() {
 	}
 
 	err = chromedp.Run(ctx,
-		chromedp.SendKeys(`input[placeholder="Suchen"]`, hashtag, chromedp.NodeVisible),
-		GetDelay(),
-		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
-		GetDelay(),
-		chromedp.Click("article > div > div > div > div > div > a > div", chromedp.NodeVisible),
+		FindItemFromSearch(hashtag)...,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = chromedp.Run(ctx,
+		OpenPostOnDiscorvery(2)...,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = chromedp.Run(ctx,
+		LikePost()...,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = chromedp.Run(ctx,
 		GetDelay(),
 		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
 		GetDelay(),
@@ -100,8 +119,6 @@ func main() {
 
 	err = chromedp.Run(ctx,
 		FollowFirstXInList(20)...,
-		//FollowNumberInList(3),
-		//chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[3]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch),
 	)
 
 	if err != nil {
@@ -155,17 +172,28 @@ func FindItemFromSearch(hashtag string) []chromedp.Action {
 		GetDelay(),
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
 		GetDelay(),
-		chromedp.Click("article > div > div > div > div > div > a > div", chromedp.NodeVisible),
-		GetDelay(),
-		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
+	}
+}
+
+func OpenPostOnDiscorvery(position int) []chromedp.Action {
+	return []chromedp.Action{
+		chromedp.Click(`//*[@id="react-root"]/section/main/article/div[1]/div/div/div[`+strconv.Itoa(position)+`]/div[2]/a/div`, chromedp.NodeVisible),
 		GetDelay(),
 	}
+}
+
+func LikePost() []chromedp.Action {
+	return []chromedp.Action{
+		chromedp.Click(`/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button`, chromedp.NodeVisible),
+		GetDelay(),
+	}
+
 }
 
 func FollowFirstXInList(count int) []chromedp.Action {
 	actions := make([]chromedp.Action, 0)
 
-	for i := 1; i < count; i++ {
+	for i := 2; i < count; i++ {
 		actions = append(actions, GetDelay())
 		actions = append(actions, FollowNumberInList(i))
 	}
@@ -174,5 +202,5 @@ func FollowFirstXInList(count int) []chromedp.Action {
 }
 
 func FollowNumberInList(number int) chromedp.Action {
-	return chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[`+ strconv.Itoa(number) +`]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch)
+	return chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[`+strconv.Itoa(number)+`]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch)
 }
