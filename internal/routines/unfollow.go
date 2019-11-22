@@ -1,7 +1,10 @@
 package routines
 
 import (
+	"context"
 	"errors"
+	"github.com/chromedp/chromedp"
+	"gitlab.applike-services.info/mcoins/backend/insta/internal/actions"
 	"gitlab.applike-services.info/mcoins/backend/insta/internal/cache"
 	"sync"
 	"time"
@@ -58,7 +61,29 @@ func (r *UnfollowRoutine) UnfollowUser() {
 			panic(errors.New("failed to unfollow user"))
 		}
 
-		println("deleting user")
+		println("deleting user from cache")
 		r.userCache.Delete(msg)
+
+		opts := append(chromedp.DefaultExecAllocatorOptions[:],
+			actions.NonHeadless,
+		)
+
+		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+		defer cancel()
+
+		ctx, cancel := chromedp.NewContext(allocCtx)
+		defer cancel()
+
+		// create a timeout
+		ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
+		defer cancel()
+
+		err := actions.RunWrap(ctx,
+			actions.PerformLogin(),
+		)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 }
