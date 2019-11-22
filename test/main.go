@@ -6,11 +6,13 @@ import (
 )
 
 func main() {
-	routine := routines.NewUnfollowRoutine()
+	unfollowRoutine := routines.NewUnfollowRoutine()
+	followRoutine := routines.NewFollowRoutine()
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(2)
 
-	go routine.Run()
+	go unfollowRoutine.Run()
+	go followRoutine.Run()
 
 	wg.Wait()
 }

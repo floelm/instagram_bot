@@ -1,4 +1,4 @@
-package main
+package routines
 
 import (
 	"context"
@@ -11,47 +11,60 @@ import (
 	"time"
 )
 
-const (
-	hashtag = "#vegan"
-)
+type FollowRoutine struct{}
 
-func main() {
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		setup.NonHeadless,
-	)
+func NewFollowRoutine() FollowRoutine {
+	return FollowRoutine{}
+}
 
-	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
-	defer cancel()
+func (r *FollowRoutine) Run() {
+	go r.follow(4, 10*time.Second, "#vegan")
+}
 
-	ctx, cancel := chromedp.NewContext(allocCtx)
-	defer cancel()
+func (r *FollowRoutine) follow(followCount int, interval time.Duration, hashtag string) {
+	ticker := time.NewTicker(interval)
 
-	// create a timeout
-	ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
-	defer cancel()
+	for {
+		select {
+		case <-ticker.C:
+			opts := append(chromedp.DefaultExecAllocatorOptions[:],
+				setup.NonHeadless,
+			)
 
-	// abuse this var
-	var err error
+			allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+			defer cancel()
 
-	setup.SetupClient(ctx)
-	err = actions.PerformLogin(ctx)
+			ctx, cancel := chromedp.NewContext(allocCtx)
+			defer cancel()
 
-	err = FindItemFromSearch(ctx, hashtag)
+			// create a timeout
+			ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
+			defer cancel()
 
-	err = OpenPostOnDiscovery(ctx, 1)
+			// abuse this var
+			var err error
 
-	err = actions.UnLike(ctx)
+			setup.SetupClient(ctx)
+			err = actions.PerformLogin(ctx)
 
-	err = setup.RunWrap(ctx,
-		actions.GetDelay(),
-		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
-		actions.GetDelay(),
-	)
+			err = FindItemFromSearch(ctx, hashtag)
 
-	err = FollowFirstXInList(ctx, 1)
+			err = OpenPostOnDiscovery(ctx, 1)
 
-	if err != nil {
-		log.Fatal("upss")
+			err = setup.RunWrap(ctx,
+				actions.GetDelay(),
+				chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
+				actions.GetDelay(),
+			)
+
+			err = FollowFirstXInList(ctx, followCount)
+
+			if err != nil {
+				log.Fatal("upss")
+			}
+
+			cancel()
+		}
 	}
 }
 
