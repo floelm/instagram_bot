@@ -8,6 +8,7 @@ import (
 	"github.com/chromedp/chromedp/kb"
 	"log"
 	"math/rand"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -60,6 +61,38 @@ const (
 	hashtag = "#vegan"
 )
 
+func RunWrap(ctx context.Context, actions ...interface{}) error {
+
+	actionsToExecute := make([]chromedp.Action, 0)
+
+	for _, a := range actions {
+		rt := reflect.TypeOf(a)
+
+		switch rt.Kind() {
+		case reflect.Slice:
+			actionsToExecute = splitActionsInto(actionsToExecute, a.([]chromedp.Action))
+		default:
+			actionsToExecute = append(actionsToExecute, a.(chromedp.Action))
+		}
+	}
+
+	err := chromedp.Run(ctx,
+		actionsToExecute...,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+
+		return err
+	}
+
+	return nil
+}
+
+func splitActionsInto(actionsToExecute []chromedp.Action, actions []chromedp.Action) []chromedp.Action {
+	return append(actionsToExecute, actions...)
+}
+
 func main() {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		NonHeadless,
@@ -75,50 +108,15 @@ func main() {
 	ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
 	defer cancel()
 
-	err := chromedp.Run(ctx,
-		PerformLogin()...,
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = chromedp.Run(ctx,
-		FindItemFromSearch(hashtag)...,
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = chromedp.Run(ctx,
-		OpenPostOnDiscorvery(2)...,
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = chromedp.Run(ctx,
-		LikePost()...,
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = chromedp.Run(ctx,
+	err := RunWrap(ctx,
+		PerformLogin(),
+		FindItemFromSearch(hashtag),
+		OpenPostOnDiscorvery(2),
+		LikePost(),
 		GetDelay(),
 		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
 		GetDelay(),
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = chromedp.Run(ctx,
-		FollowFirstXInList(20)...,
+		FollowFirstXInList(1),
 	)
 
 	if err != nil {
