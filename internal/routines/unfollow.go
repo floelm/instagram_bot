@@ -75,11 +75,13 @@ func (r *UnfollowRoutine) UnfollowUser() {
 		defer cancel()
 
 		// create a timeout
-		ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, 20*time.Second)
 		defer cancel()
 
 		err := actions.RunWrap(ctx,
 			actions.PerformLogin(),
+			actions.GetDelay(),
+			actions.UnfollowUser(msg),
 		)
 
 		if err != nil {
