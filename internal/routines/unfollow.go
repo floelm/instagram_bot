@@ -13,13 +13,13 @@ import (
 
 type UnfollowRoutine struct {
 	userCache cache.UserCache
-	userUrl   chan string
+	userName  chan string
 }
 
 func NewUnfollowRoutine() UnfollowRoutine {
 	userChannel := make(chan string, 0)
 
-	return UnfollowRoutine{userCache: cache.NewUserCache(), userUrl: userChannel}
+	return UnfollowRoutine{userCache: cache.NewUserCache(), userName: userChannel}
 }
 
 func (r *UnfollowRoutine) Run() {
@@ -47,7 +47,7 @@ func (r *UnfollowRoutine) FindUsersToUnfollow() {
 				expiresAt := time.Unix(expiresAtStamp, 0)
 
 				if expiresAt.Before(now) {
-					r.userUrl <- key
+					r.userName <- key
 				}
 			}
 		}
@@ -56,7 +56,7 @@ func (r *UnfollowRoutine) FindUsersToUnfollow() {
 
 func (r *UnfollowRoutine) UnfollowUser() {
 	for {
-		userUrl, ok := <-r.userUrl
+		userUrl, ok := <-r.userName
 
 		if !ok {
 			panic(errors.New("failed to unfollow user"))
@@ -76,7 +76,7 @@ func (r *UnfollowRoutine) UnfollowUser() {
 		defer cancel()
 
 		// create a timeout
-		ctx, cancel = context.WithTimeout(ctx, 20*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, 2000*time.Second)
 		defer cancel()
 
 		err := actions.PerformLogin(ctx)
@@ -90,5 +90,7 @@ func (r *UnfollowRoutine) UnfollowUser() {
 		if err != nil {
 			panic(err)
 		}
+
+		cancel()
 	}
 }
