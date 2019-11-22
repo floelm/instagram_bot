@@ -7,9 +7,14 @@ import (
 	"strings"
 )
 
+const (
+	LikeButtonElement     = `/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button`
+	LikeButtonIconElement = `/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button/span`
+)
+
 func ToggleLike(ctx context.Context) error {
 	err := setup.RunWrap(ctx,
-		chromedp.Click(`/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button`, chromedp.NodeVisible),
+		chromedp.Click(LikeButtonElement, chromedp.NodeVisible),
 		GetDelay(),
 	)
 
@@ -24,7 +29,7 @@ func Like(ctx context.Context) error {
 	}
 
 	err := setup.RunWrap(ctx,
-		chromedp.Click(`/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button`, chromedp.NodeVisible),
+		chromedp.Click(LikeButtonElement, chromedp.NodeVisible),
 		GetDelay(),
 	)
 
@@ -39,7 +44,7 @@ func UnLike(ctx context.Context) error {
 	}
 
 	err := setup.RunWrap(ctx,
-		chromedp.Click(`/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button`, chromedp.NodeVisible),
+		chromedp.Click(LikeButtonElement, chromedp.NodeVisible),
 		GetDelay(),
 	)
 
@@ -50,7 +55,7 @@ func IsLiked(ctx context.Context) bool {
 	attributes := make([]map[string]string, 0)
 
 	setup.RunWrap(ctx,
-		chromedp.AttributesAll(`/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button/span`, &attributes, chromedp.NodeVisible),
+		chromedp.AttributesAll(LikeButtonIconElement, &attributes, chromedp.NodeVisible),
 		GetDelay(),
 	)
 

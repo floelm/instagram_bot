@@ -40,15 +40,21 @@ func main() {
 
 	err = OpenPostOnDiscovery(ctx, 1)
 
-	err = actions.UnLike(ctx)
+	err = actions.Like(ctx)
+	err = actions.Comment(ctx)
 
 	err = setup.RunWrap(ctx,
+		chromedp.Sleep(1000*time.Second),
 		actions.GetDelay(),
 		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
 		actions.GetDelay(),
 	)
 
-	err = FollowFirstXInList(ctx, 1)
+	err = actions.FollowFirstXInList(ctx, 1)
+
+	err = setup.RunWrap(ctx,
+		chromedp.Sleep(100*time.Second),
+	)
 
 	if err != nil {
 		log.Fatal("upss")
@@ -71,25 +77,6 @@ func OpenPostOnDiscovery(ctx context.Context, position int) error {
 		actions.GetDelay(),
 		chromedp.Click(`//*[@id="react-root"]/section/main/article/div[1]/div/div/div[`+strconv.Itoa(position)+`]/div[2]/a/div`, chromedp.NodeVisible),
 		actions.GetDelay(),
-	)
-
-	return err
-}
-
-func FollowFirstXInList(ctx context.Context, count int) error {
-	var err error
-
-	for i := 2; i < count; i++ {
-		err = FollowNumberInList(ctx, i)
-	}
-
-	return err
-}
-
-func FollowNumberInList(ctx context.Context, number int) error {
-	err := setup.RunWrap(ctx,
-		actions.GetDelay(),
-		chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[`+strconv.Itoa(number)+`]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch),
 	)
 
 	return err
