@@ -6,6 +6,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"gitlab.applike-services.info/mcoins/backend/insta/internal/actions"
 	"gitlab.applike-services.info/mcoins/backend/insta/internal/cache"
+	"gitlab.applike-services.info/mcoins/backend/insta/internal/setup"
 	"sync"
 	"time"
 )
@@ -65,7 +66,7 @@ func (r *UnfollowRoutine) UnfollowUser() {
 		r.userCache.Delete(msg)
 
 		opts := append(chromedp.DefaultExecAllocatorOptions[:],
-			actions.NonHeadless,
+			setup.NonHeadless,
 		)
 
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)

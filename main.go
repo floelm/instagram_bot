@@ -5,6 +5,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/chromedp/chromedp/kb"
 	"gitlab.applike-services.info/mcoins/backend/insta/internal/actions"
+	"gitlab.applike-services.info/mcoins/backend/insta/internal/setup"
 	"log"
 	"strconv"
 	"time"
@@ -16,7 +17,7 @@ const (
 
 func main() {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		actions.NonHeadless,
+		setup.NonHeadless,
 	)
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
@@ -29,56 +30,67 @@ func main() {
 	ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
 	defer cancel()
 
-	attributes := make([]map[string]string, 0)
+	// abuse this var
+	var err error
 
-	err := actions.RunWrap(ctx,
-		actions.PerformLogin(),
-		FindItemFromSearch(hashtag),
-		OpenPostOnDiscorvery(1),
-		actions.Like(attributes),
-	)
+	setup.SetupClient(ctx)
+	err = actions.PerformLogin(ctx)
 
-	err = actions.RunWrap(ctx,
-		chromedp.Sleep(1000*time.Second),
+	err = FindItemFromSearch(ctx, hashtag)
+
+	err = OpenPostOnDiscorvery(ctx, 1)
+
+	err = actions.UnLike(ctx)
+
+	err = setup.RunWrap(ctx,
 		actions.GetDelay(),
 		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
 		actions.GetDelay(),
-		FollowFirstXInList(1),
 	)
 
+	err = FollowFirstXInList(ctx, 1)
+
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("upss")
 	}
 }
 
-func FindItemFromSearch(hashtag string) []chromedp.Action {
-	return []chromedp.Action{
+func FindItemFromSearch(ctx context.Context, hashtag string) error {
+	err := setup.RunWrap(ctx,
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, hashtag, chromedp.NodeVisible),
 		actions.GetDelay(),
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
 		actions.GetDelay(),
-	}
+	)
+
+	return err
 }
 
-func OpenPostOnDiscorvery(position int) []chromedp.Action {
-	return []chromedp.Action{
+func OpenPostOnDiscorvery(ctx context.Context, position int) error {
+	err := setup.RunWrap(ctx,
 		actions.GetDelay(),
 		chromedp.Click(`//*[@id="react-root"]/section/main/article/div[1]/div/div/div[`+strconv.Itoa(position)+`]/div[2]/a/div`, chromedp.NodeVisible),
 		actions.GetDelay(),
-	}
+	)
+
+	return err
 }
 
-func FollowFirstXInList(count int) []chromedp.Action {
-	actionsToExecute := make([]chromedp.Action, 0)
+func FollowFirstXInList(ctx context.Context, count int) error {
+	var err error
 
 	for i := 2; i < count; i++ {
-		actionsToExecute = append(actionsToExecute, actions.GetDelay())
-		actionsToExecute = append(actionsToExecute, FollowNumberInList(i))
+		err = FollowNumberInList(ctx, i)
 	}
 
-	return actionsToExecute
+	return err
 }
 
-func FollowNumberInList(number int) chromedp.Action {
-	return chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[`+strconv.Itoa(number)+`]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch)
+func FollowNumberInList(ctx context.Context, number int) error {
+	err := setup.RunWrap(ctx,
+		actions.GetDelay(),
+		chromedp.Click(`/html/body/div[4]/div/div[2]/div/div/div[`+strconv.Itoa(number)+`]/div[3]/button`, chromedp.NodeVisible, chromedp.BySearch),
+	)
+
+	return err
 }
