@@ -6,8 +6,8 @@ import (
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/chromedp/chromedp/kb"
+	"gitlab.applike-services.info/mcoins/backend/insta/internal/actions"
 	"log"
-	"math/rand"
 	"reflect"
 	"strconv"
 	"time"
@@ -108,14 +108,20 @@ func main() {
 	ctx, cancel = context.WithTimeout(ctx, 1000*time.Second)
 	defer cancel()
 
+	attributes := make([]map[string]string, 0)
+
 	err := RunWrap(ctx,
 		PerformLogin(),
 		FindItemFromSearch(hashtag),
-		OpenPostOnDiscorvery(2),
-		LikePost(),
-		GetDelay(),
+		OpenPostOnDiscorvery(1),
+		actions.Like(attributes),
+	)
+
+	err = RunWrap(ctx,
+		chromedp.Sleep(1000*time.Second),
+		actions.GetDelay(),
 		chromedp.Click(`article section button[type="button"]`, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 		FollowFirstXInList(1),
 	)
 
@@ -128,13 +134,6 @@ func NonHeadless(a *chromedp.ExecAllocator) {
 	chromedp.Flag("headless", false)(a)
 	chromedp.Flag("hide-scrollbars", false)(a)
 	chromedp.Flag("mute-audio", true)(a)
-}
-
-func GetDelay() chromedp.Action {
-	min := 1
-	max := 2
-	randomInt := rand.Intn(max-min) + min
-	return chromedp.Sleep(time.Duration(randomInt) * time.Second)
 }
 
 func PerformLogin() []chromedp.Action {
@@ -153,50 +152,43 @@ func PerformLogin() []chromedp.Action {
 
 		chromedp.Navigate(`https://www.instagram.com/accounts/login/?source=auth_switcher`),
 		chromedp.SendKeys(`input[name="username"]`, `blzdontblockus@web.de`, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 		chromedp.SendKeys(`input[name="password"]`, `Hallo123456!`, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 		chromedp.RemoveAttribute(`button[type="submit"]`, "disabled"),
 		chromedp.Click(`button[type="submit"]`, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 		chromedp.Click(`.aOOlW.HoLwm`, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 	}
 }
 
 func FindItemFromSearch(hashtag string) []chromedp.Action {
 	return []chromedp.Action{
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, hashtag, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 		chromedp.SendKeys(`input[placeholder="Suchen"]`, kb.Enter+kb.Enter, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 	}
 }
 
 func OpenPostOnDiscorvery(position int) []chromedp.Action {
 	return []chromedp.Action{
+		actions.GetDelay(),
 		chromedp.Click(`//*[@id="react-root"]/section/main/article/div[1]/div/div/div[`+strconv.Itoa(position)+`]/div[2]/a/div`, chromedp.NodeVisible),
-		GetDelay(),
+		actions.GetDelay(),
 	}
-}
-
-func LikePost() []chromedp.Action {
-	return []chromedp.Action{
-		chromedp.Click(`/html/body/div[3]/div[2]/div/article/div[2]/section[1]/span[1]/button`, chromedp.NodeVisible),
-		GetDelay(),
-	}
-
 }
 
 func FollowFirstXInList(count int) []chromedp.Action {
-	actions := make([]chromedp.Action, 0)
+	actionsToExecute := make([]chromedp.Action, 0)
 
 	for i := 2; i < count; i++ {
-		actions = append(actions, GetDelay())
-		actions = append(actions, FollowNumberInList(i))
+		actionsToExecute = append(actionsToExecute, actions.GetDelay())
+		actionsToExecute = append(actionsToExecute, FollowNumberInList(i))
 	}
 
-	return actions
+	return actionsToExecute
 }
 
 func FollowNumberInList(number int) chromedp.Action {
